@@ -10,7 +10,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { eventName, eventDescription, eventLocation } = req.body.form;
+  const { eventName, eventDescription } = req.body.formData.form;
+  const userEmail = req.body.formData.userEmail;
+  console.log(req.body.formData);
 
   const event = await prisma.event.create({
     data: {
@@ -19,7 +21,7 @@ export default async function handler(
       date: new Date(),
       user: {
         connect: {
-          id: 1,
+          email: userEmail,
         },
       },
     },

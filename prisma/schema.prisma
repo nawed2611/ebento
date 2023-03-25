@@ -10,7 +10,7 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
+  email     String   @unique @default(cuid())
   name      String?
   events    Event[]
   createdAt DateTime @default(now())
@@ -24,6 +24,6 @@ model Event {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  userId      Int
-  User        User     @relation(fields: [userId], references: [id])
+  userEmail   String
+  user        User     @relation(fields: [userEmail], references: [email])
 }

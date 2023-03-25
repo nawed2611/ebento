@@ -5,8 +5,11 @@ import {
   SignedIn,
   SignedOut,
   SignInButton,
-  UserButton
+  UserButton,
+  SignOutButton
 } from "@clerk/nextjs";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 import type { GetStaticProps } from 'next';
 import { Inter } from 'next/font/google';
@@ -16,7 +19,7 @@ const inter = Inter({ subsets: ['latin'] });
 // pages/index.tsx
 import prisma from '../lib/prisma';
 
-export default function Home(props: { feed: any[] }) {
+export default function Home(props: { events: any[] }) {
   const { isLoaded, isSignedIn, user } = useUser();
   const [form, setForm] = useState({
     eventName: '',
@@ -28,8 +31,14 @@ export default function Home(props: { feed: any[] }) {
     return null;
   }
 
+  console.log(props.events);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const formData = {
+      form,
+      userEmail: user.primaryEmailAddress.emailAddress
+    }
 
     const res = await fetch('/api/createEvent', {
       method: 'POST',
@@ -37,12 +46,18 @@ export default function Home(props: { feed: any[] }) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        form
+        formData
       }),
     });
 
     const result = await res.json();
-    console.log(result);
+
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+
+    toast.success('Event created successfully');
   };
 
   return (
@@ -54,6 +69,7 @@ export default function Home(props: { feed: any[] }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className='flex flex-col text-slate-100 h-screen'>
+        <Toaster />
         <div className='p-4 m-2 border-2 border-white flex justify-between'>
           <h1 className='text-4xl font-bold'>Ebento</h1>
           <div className='flex flex-row mx-2 items-center'>
@@ -62,6 +78,10 @@ export default function Home(props: { feed: any[] }) {
                 !!user && <p className='text-lg mx-2'>{user.fullName}</p>
               }
               <UserButton />
+              <div className='ml-2 bg-slate-800 px-2'>
+
+                <SignOutButton />
+              </div>
             </SignedIn>
             <SignedOut>
               {/* Signed out users get sign in button */}
@@ -70,32 +90,54 @@ export default function Home(props: { feed: any[] }) {
           </div>
         </div>
 
-        <div className='flex flex-col mt-12 justify-center items-center'>
-          <h1 className='text-4xl font-bold'>Ebento - Visualise Event Feedbacks</h1>
-          <p className='text-xl'>Get feedbacks from your event attendees and track satisfaction metrics</p>
-        </div>
+
 
         <SignedIn>
-          <div className='flex flex-col mt-12 justify-center items-center'>
-            <h1 className='text-3xl font-bold'>Create an Event</h1>
-            <form className='flex flex-col justify-center w-1/4 items-center mt-4'
-              onSubmit={handleSubmit}
-            >
-              <input type='text' value={form.eventName}
-                onChange={(e) => setForm({ ...form, eventName: e.target.value })}
-                placeholder='Event Name' className='p-3 m-2 outline-none bg-transparent border w-full' />
+          <div className='flex gap-x-16 m-12 h-full'>
+            <div className='flex w-2/3 flex-col h-full overflow-y-scroll'>
+              <h1 className='text-3xl font-bold'>Your Past Events</h1>
 
-              <input type='text' value={form.eventDescription}
-                onChange={(e) => setForm({ ...form, eventDescription: e.target.value })}
-                placeholder='Event Description' className='p-3 m-2 outline-none bg-transparent border w-full' />
+              <div className='flex mt-2 bg-slate-800 p-4 flex-wrap'>
+                {
+                  props.events.map((event) => {
+                    return (
+                      <div key={event} className='flex flex-row justify-between items-center w-full h-40 p-2 m-4 border-2 border-white'>
+                        <div className='flex flex-col'>
+                          <h1 className='text-xl font-bold'>{event.name}</h1>
+                          <p className='text-lg'>{event.description}</p>
+                          <p className='text-lg'>{event.date}</p>
+                        </div>
+                        <div className='flex flex-col'>
+                          <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border'>View Feedbacks</button>
+                          <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border'>Delete Event</button>
+                        </div>
+                      </div>
+                    )
+                  })
+                }
+              </div>
+            </div>
 
-              <input type='text' value={form.eventLocation}
-                onChange={(e) => setForm({ ...form, eventLocation: e.target.value })}
-                placeholder='Event Location' className='p-3 m-2 outline-none bg-transparent border w-full' />
+            <div className='flex flex-col w-1/2'>
+              <h1 className='text-3xl font-bold'>Create an Event</h1>
+              <form className='flex flex-col  mt-4 w-3/4'
+                onSubmit={handleSubmit}
+              >
+                <input type='text' value={form.eventName}
+                  onChange={(e) => setForm({ ...form, eventName: e.target.value })}
+                  placeholder='Event Name' className='p-3 m-2 outline-none bg-transparent border w-full' />
 
-              <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border w-full grow'>Create Event</button>
-            </form>
+                <input type='text' value={form.eventDescription}
+                  onChange={(e) => setForm({ ...form, eventDescription: e.target.value })}
+                  placeholder='Event Description' className='p-3 m-2 outline-none bg-transparent border w-full' />
 
+                <input type='text' value={form.eventLocation}
+                  onChange={(e) => setForm({ ...form, eventLocation: e.target.value })}
+                  placeholder='Event Location' className='p-3 m-2 outline-none bg-transparent border w-full' />
+
+                <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border w-full grow'>Create Event</button>
+              </form>
+            </div>
           </div>
         </SignedIn>
       </main>
@@ -104,10 +146,9 @@ export default function Home(props: { feed: any[] }) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const feed = await prisma.user.findMany();
-
+  const events = await prisma.event.findMany();
   return {
-    props: { feed: JSON.parse(JSON.stringify(feed)) },
+    props: { events: JSON.parse(JSON.stringify(events)) },
     revalidate: 10,
   };
 };
