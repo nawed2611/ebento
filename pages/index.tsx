@@ -31,9 +31,9 @@ export default function Home(props: { events: any[] }) {
     return null;
   }
 
-  console.log(props.events);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    toast.loading('Creating event...');
 
     const formData = {
       form,
@@ -70,7 +70,7 @@ export default function Home(props: { events: any[] }) {
       </Head>
       <main className='flex flex-col text-slate-100 h-screen'>
         <Toaster />
-        <div className='p-4 m-2 border-2 border-white flex justify-between'>
+        <div className='p-4 m-2 border-2 border-white rounded-md flex justify-between'>
           <h1 className='text-4xl font-bold'>Ebento</h1>
           <div className='flex flex-row mx-2 items-center'>
             <SignedIn>
@@ -78,8 +78,7 @@ export default function Home(props: { events: any[] }) {
                 !!user && <p className='text-lg mx-2'>{user.fullName}</p>
               }
               <UserButton />
-              <div className='ml-2 bg-slate-800 px-2'>
-
+              <div className='ml-4 bg-slate-800 px-2 py-1 rounded-md'>
                 <SignOutButton />
               </div>
             </SignedIn>
@@ -97,11 +96,11 @@ export default function Home(props: { events: any[] }) {
             <div className='flex w-2/3 flex-col h-full overflow-y-scroll'>
               <h1 className='text-3xl font-bold'>Your Past Events</h1>
 
-              <div className='flex mt-2 bg-slate-800 p-4 flex-wrap'>
+              <div className='flex mt-2 bg-slate-800 p-4 flex-wrap rounded-md'>
                 {
                   props.events.map((event) => {
                     return (
-                      <div key={event} className='flex flex-row justify-between items-center w-full h-40 p-2 m-4 border-2 border-white'>
+                      <div key={event} className='flex flex-row rounded-md justify-between items-center w-full h-40 p-2 m-4 border-2 border-white'>
                         <div className='flex flex-col'>
                           <h1 className='text-xl font-bold'>{event.name}</h1>
                           <p className='text-lg'>{event.description}</p>
@@ -125,17 +124,17 @@ export default function Home(props: { events: any[] }) {
               >
                 <input type='text' value={form.eventName}
                   onChange={(e) => setForm({ ...form, eventName: e.target.value })}
-                  placeholder='Event Name' className='p-3 m-2 outline-none bg-transparent border w-full' />
+                  placeholder='Event Name' className='p-3 m-2 outline-none bg-transparent border w-full rounded-md' />
 
                 <input type='text' value={form.eventDescription}
                   onChange={(e) => setForm({ ...form, eventDescription: e.target.value })}
-                  placeholder='Event Description' className='p-3 m-2 outline-none bg-transparent border w-full' />
+                  placeholder='Event Description' className='p-3 m-2 outline-none bg-transparent border w-full rounded-md' />
 
                 <input type='text' value={form.eventLocation}
                   onChange={(e) => setForm({ ...form, eventLocation: e.target.value })}
-                  placeholder='Event Location' className='p-3 m-2 outline-none bg-transparent border w-full' />
+                  placeholder='Event Location' className='p-3 m-2 outline-none bg-transparent border w-full rounded-md' />
 
-                <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border w-full grow'>Create Event</button>
+                <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border w-full rounded-md grow'>Create Event</button>
               </form>
             </div>
           </div>
