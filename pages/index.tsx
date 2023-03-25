@@ -140,6 +140,13 @@ export default function Home(props: { events: any[] }) {
             </div>
           </div>
         </SignedIn>
+
+        <SignedOut>
+          <div className='flex flex-col items-center justify-center h-full'>
+            <h1 className='text-3xl font-bold'>Visualize event feedbacks</h1>
+            <p className='text-lg'>Sign in to get started</p>
+          </div>
+        </SignedOut>
       </main>
     </>
   )
