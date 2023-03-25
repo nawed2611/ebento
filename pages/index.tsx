@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { Inter } from 'next/font/google';
+import React, { useState, useEffect } from 'react';
 import {
   useUser,
   SignedIn,
@@ -7,10 +7,43 @@ import {
   SignInButton,
   UserButton
 } from "@clerk/nextjs";
+
+import type { GetStaticProps } from 'next';
+import { Inter } from 'next/font/google';
+
 const inter = Inter({ subsets: ['latin'] });
 
-export default function Home() {
+// pages/index.tsx
+import prisma from '../lib/prisma';
+
+export default function Home(props: { feed: any[] }) {
   const { isLoaded, isSignedIn, user } = useUser();
+  const [form, setForm] = useState({
+    eventName: '',
+    eventDescription: '',
+    eventLocation: '',
+  });
+
+  if (!isLoaded) {
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const res = await fetch('/api/createEvent', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        form
+      }),
+    });
+
+    const result = await res.json();
+    console.log(result);
+  };
 
   return (
     <>
@@ -20,14 +53,13 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className='flex flex-col text-slate-100 justify-center'>
+      <main className='flex flex-col text-slate-100 h-screen'>
         <div className='p-4 m-2 border-2 border-white flex justify-between'>
           <h1 className='text-4xl font-bold'>Ebento</h1>
           <div className='flex flex-row mx-2 items-center'>
             <SignedIn>
-              {/* Mount the UserButton component */}
               {
-                user && <p className='text-lg mx-2'>{user.fullName}</p>
+                !!user && <p className='text-lg mx-2'>{user.fullName}</p>
               }
               <UserButton />
             </SignedIn>
@@ -39,10 +71,43 @@ export default function Home() {
         </div>
 
         <div className='flex flex-col mt-12 justify-center items-center'>
-          <h1 className='text-4xl font-bold'>Visualise Event Feedbacks</h1>
+          <h1 className='text-4xl font-bold'>Ebento - Visualise Event Feedbacks</h1>
           <p className='text-xl'>Get feedbacks from your event attendees and track satisfaction metrics</p>
         </div>
+
+        <SignedIn>
+          <div className='flex flex-col mt-12 justify-center items-center'>
+            <h1 className='text-3xl font-bold'>Create an Event</h1>
+            <form className='flex flex-col justify-center w-1/4 items-center mt-4'
+              onSubmit={handleSubmit}
+            >
+              <input type='text' value={form.eventName}
+                onChange={(e) => setForm({ ...form, eventName: e.target.value })}
+                placeholder='Event Name' className='p-3 m-2 outline-none bg-transparent border w-full' />
+
+              <input type='text' value={form.eventDescription}
+                onChange={(e) => setForm({ ...form, eventDescription: e.target.value })}
+                placeholder='Event Description' className='p-3 m-2 outline-none bg-transparent border w-full' />
+
+              <input type='text' value={form.eventLocation}
+                onChange={(e) => setForm({ ...form, eventLocation: e.target.value })}
+                placeholder='Event Location' className='p-3 m-2 outline-none bg-transparent border w-full' />
+
+              <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border w-full grow'>Create Event</button>
+            </form>
+
+          </div>
+        </SignedIn>
       </main>
     </>
   )
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+  const feed = await prisma.user.findMany();
+
+  return {
+    props: { feed: JSON.parse(JSON.stringify(feed)) },
+    revalidate: 10,
+  };
+};
