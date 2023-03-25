@@ -93,10 +93,10 @@ export default function Home(props: { events: any[] }) {
 
         <SignedIn>
           <div className='flex gap-x-16 m-12 h-full'>
-            <div className='flex w-2/3 flex-col h-full overflow-y-scroll'>
+            <div className='flex w-2/3 flex-col'>
               <h1 className='text-3xl font-bold'>Your Past Events</h1>
 
-              <div className='flex mt-2 bg-slate-800 p-4 flex-wrap rounded-md'>
+              <div className='flex mt-2 bg-slate-800 p-4 flex-wrap rounded-md h-[70vh] overflow-y-scroll'>
                 {
                   props.events.map((event) => {
                     return (
