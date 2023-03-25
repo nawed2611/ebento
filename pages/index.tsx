@@ -37,7 +37,7 @@ export default function Home(props: { events: any[] }) {
 
     const formData = {
       form,
-      userEmail: user.primaryEmailAddress.emailAddress
+      userEmail: user?.primaryEmailAddress?.emailAddress
     }
 
     const res = await fetch('/api/createEvent', {
