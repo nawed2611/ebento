@@ -9,8 +9,6 @@ import {
   SignOutButton
 } from "@clerk/nextjs";
 import toast, { Toaster } from 'react-hot-toast';
-
-
 import type { GetStaticProps } from 'next';
 import { Inter } from 'next/font/google';
 
@@ -18,9 +16,12 @@ const inter = Inter({ subsets: ['latin'] });
 
 // pages/index.tsx
 import prisma from '../lib/prisma';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function Home(props: { events: any[] }) {
   const { isLoaded, isSignedIn, user } = useUser();
+  const router = useRouter();
   const [form, setForm] = useState({
     eventName: '',
     eventDescription: '',
@@ -89,8 +90,6 @@ export default function Home(props: { events: any[] }) {
           </div>
         </div>
 
-
-
         <SignedIn>
           <div className='flex gap-x-16 m-12 h-full'>
             <div className='flex w-2/3 flex-col'>
@@ -107,8 +106,10 @@ export default function Home(props: { events: any[] }) {
                           <p className='text-lg'>{event.date}</p>
                         </div>
                         <div className='flex flex-col'>
-                          <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border'>View Feedbacks</button>
-                          <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border'>Delete Event</button>
+                          <button onClick={() => {
+                            router.push(`/feedbacks/${event.name}`);
+                          }} className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border rounded-md'>View Feedbacks</button>
+                          <button className='p-2 m-2 hover:scale-105 transition-all outline-none bg-transparent border rounded-md'>Delete Event</button>
                         </div>
                       </div>
                     )
